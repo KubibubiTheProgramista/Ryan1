@@ -2,150 +2,176 @@ let departureDate = '';
 let returnDate = '';
 let peopleCount = 1;
 let destination = '';
+let origin = '';
+let departure = '';
 let activeField = null;
 let showCalendar = false;
 let calendarType = '';
 let currentYear = 2025;
 let currentMonth = 6; // Czerwiec (0-11)
+let logoImg;
 
-
+function preload() {
+  // Load the logo image
+  logoImg = loadImage('https://raw.githubusercontent.com/cooqieez/rajansrer/refs/heads/main/logo_w.png');
+}
 
 function setup() {
-  createCanvas(800, 600);
+  createCanvas(windowWidth, windowHeight);
   textAlign(LEFT, TOP);
 }
 
 function draw() {
-  background('#003580');
+  background("#f6f6f6"); // Ryanair niebieski
   
-  // Pasek górny
-  fill('#FFD700');
+    // Draw yellow bar at the top
+  fill(7, 53, 144); // bright yellow
   noStroke();
   rect(0, 0, width, 60);
+
   
-  // Logo Ryanair
-  fill('#003580');
-  ellipse(60, 30, 40, 40);
-  fill('#FFD700');
-  triangle(55, 20, 65, 20, 60, 40);
-  
-  // Nazwa Ryanair
-  fill('#003580');
-  textSize(32);
+  // Głowny naglowek - hasło Ryanair
+fill("#073590");
+  textSize(48);
   textStyle(BOLD);
-  text('RYANAIR', 110, 16);
+  textAlign(LEFT, TOP);
+  text('Gdzie chcesz, kiedy chcesz, jak chcesz.', 60, 100);
   
-  // Nagłówek
-  fill(255);
-  textSize(28);
+  // Podtytul
+ fill("#073590");
+  textSize(24);
   textStyle(NORMAL);
-  text('Tanie loty po Europie', 40, 100);
+  text('My dźwigniemy formalności, Ty konsekwencje!', 60, 170);
   
-  // Formularz
-  drawForm();
+  // Formularz w ukladzie horyzontalnym
+  drawHorizontalForm();
   
   // Kalendarz (jeśli aktywny)
   if (showCalendar) {
     drawCalendar();
   }
   
-  // Przycisk wyszukiwania
-  fill('#FFD700');
-  rect(40, 480, 200, 50, 10);
-  fill('#003580');
-  textSize(20);
+  // Przycisk "szukaj lotow"
+  fill('#FFD100');
+  noStroke();
+  rect(60, 550, 300, 60, 15);
+  fill("#073590");
+  textSize(28);
   textAlign(CENTER, CENTER);
-  text('Szukaj lotów', 140, 505);
+  text('Szukaj lotów', 210, 580);
   textAlign(LEFT, TOP);
   
-  // Dodatkowe elementy
-  fill(255);
-  textSize(16);
-  text('Ponad 200 kierunków w 34 krajach!', 40, 150);
+  if (logoImg) {
+  imageMode(CORNER);
+  let barHeight = 60;
+  let padding = 20;
+  let logoHeight = barHeight - (padding * 2);
+  let logoWidth = logoImg.width * (logoHeight / logoImg.height);
+  // Zmieniamy pozycję x na padding, a y na padding
+  image(logoImg, padding, padding, logoWidth, logoHeight);
+}
+  
 }
 
-function drawForm() {
-  // Tła pól
-  fill(255);
-  stroke(200);
-  strokeWeight(1);
+
+function drawHorizontalForm() {
+  // Pierwszy rząd - daty
+  fill(220); // Szary kolor
+  noStroke();
   
   // Data wylotu
-  rect(40, 210, 180, 35);
-  rect(250, 210, 180, 35);
-  rect(40, 350, 180, 35);
-  rect(40, 400, 300, 35);
+  rect(60, 250, 300, 50, 15);
+  // Data powrotu
+  rect(380, 250, 300, 50, 15);
+  
+  // Drugi rząd - liczba osób, destynacja i origin
+  rect(60, 430, 300, 50, 15);
+  rect(380, 340, 300, 50, 15);
+  rect(60, 340, 300, 50, 15);
   
   // Etykiety
   fill(255);
-  noStroke();
-  textSize(14);
-  text('Data wylotu:', 40, 190);
-  text('Data powrotu:', 250, 190);
-  text('Liczba osób:', 40, 335);
-  text('Dokąd lecisz:', 40, 385);
+  fill("#073590")
+  textSize(16);
+  text('Data wylotu:', 60, 230);
+  text('Data powrotu:', 380, 230);
+  text('Liczba osób:', 60, 410);
+  text('Dokąd lecisz:', 380, 320);
+  text('Skąd lecisz:', 60, 320);
   
   // Wartości w polach
-  fill(0);
-  textSize(16);
-  text(departureDate || 'Kliknij aby wybrać', 45, 220);
-  text(returnDate || 'Kliknij aby wybrać', 255, 220);
-  text(peopleCount.toString(), 45, 365);
-  text(destination || 'Wpisz destynację', 45, 415);
+  fill(80); // Ciemny tekst na szarym tle
+  textSize(18);
+  text(departureDate || 'Kliknij aby wybrać', 75, 266);
+  text(returnDate || 'Kliknij aby wybrać', 395, 266);
+  text(peopleCount.toString(), 75, 446);
+  text(destination || 'Wpisz miejsce przylotu', 395, 356);
+  text(origin || 'Wpisz miejsce wylotu', 75, 356);
   
-  // Podświetlenie aktywnego pola
+  // Podświetlenie aktywnego pola - żółte obramowanie
   if (activeField) {
     noFill();
-    stroke('#FFD700');
-    strokeWeight(3);
-    let y = getFieldY(activeField);
-    rect(40, y, activeField === 'destination' ? 300 : 180, 35);
+    stroke('#FFD100');
+    strokeWeight(4);
+    let coords = getFieldCoords(activeField);
+    rect(coords.x, coords.y, coords.w, coords.h, 15);
   }
   
-  // Przyciski +/- dla liczby osób
-  fill('#FFD700');
+  // Przyciski +/- dla liczby osób - żółte z zaokrąglonymi rogami
+  fill('#FFD100');
   noStroke();
-  rect(230, 350, 30, 35);
-  rect(270, 350, 30, 35);
-  fill('#003580');
+  rect(280, 440, 30, 30, 8);
+  rect(320, 440, 30, 30, 8);
+  fill("#073590");
   textAlign(CENTER, CENTER);
-  textSize(20);
-  text('-', 245, 367);
-  text('+', 285, 367);
+  textSize(24);
+  text('-', 295, 455);
+  text('+', 335, 455);
   textAlign(LEFT, TOP);
 }
 
+
+
+
+
+
+
+
+
 function drawCalendar() {
-  // Tło kalendarza
+  // Tło kalendarza z zaokrąglonymi rogami
   fill(255);
-  stroke(0);
+  stroke("#073590");
   strokeWeight(2);
-  rect(350, 200, 300, 250);
+  rect(700, 250, 300, 250, 15);
   
-  // Nagłówek kalendarza
-  fill('#003580');
+  // Nagłówek kalendarza - niebieski Ryanair
+  fill("#073590");
   noStroke();
-  rect(350, 200, 300, 40);
-  fill(255);
+  rect(700, 250, 300, 40, 15);
+  rect(700, 270, 300, 20); // Prostokąt bez zaokrągleń na dole nagłówka
+  
+  fill('#FFD100');
   textAlign(CENTER, CENTER);
   textSize(16);
-  text(getMonthName(currentMonth) + ' ' + currentYear, 500, 220);
+  text(getMonthName(currentMonth) + ' ' + currentYear, 850, 270);
   
-  // Przyciski nawigacji
-  fill('#FFD700');
-  rect(360, 210, 20, 20);
-  rect(620, 210, 20, 20);
-  fill('#003580');
+  // Przyciski nawigacji - żółte z zaokrąglonymi rogami
+  fill('#FFD100');
+  noStroke();
+  rect(720, 260, 20, 20, 5);
+  rect(955, 260, 20, 20, 5);
+  fill("#073590");
   textSize(12);
-  text('<', 370, 220);
-  text('>', 630, 220);
+  text('<', 729, 269);
+  text('>', 965, 269);
   
   // Dni tygodnia
-  fill(0);
+  fill("#073590");
   textSize(12);
   let days = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'];
   for (let i = 0; i < 7; i++) {
-    text(days[i], 365 + i * 40, 255);
+    text(days[i], 730 + i * 40, 320);
   }
   
   // Dni miesiąca
@@ -153,24 +179,33 @@ function drawCalendar() {
   let firstDay = new Date(currentYear, currentMonth, 1).getDay();
   firstDay = firstDay === 0 ? 6 : firstDay - 1; // Poniedziałek = 0
   
+  fill("#073590");
   for (let day = 1; day <= daysInMonth; day++) {
-    let x = 365 + ((firstDay + day - 1) % 7) * 40;
-    let y = 275 + Math.floor((firstDay + day - 1) / 7) * 25;
+    let x = 730 + ((firstDay + day - 1) % 7) * 40;
+    let y = 350 + Math.floor((firstDay + day - 1) / 7) * 25;
     
-    fill(0);
+    // Podświetlenie dnia po najechaniu
+    if (mouseX > x - 15 && mouseX < x + 15 && mouseY > y - 10 && mouseY < y + 10) {
+      fill('#FFD100');
+      noStroke();
+      ellipse(x, y, 25, 25);
+      fill("#073590");
+    }
+    
     text(day, x, y);
   }
   
   textAlign(LEFT, TOP);
 }
 
-function getFieldY(field) {
+function getFieldCoords(field) {
   switch(field) {
-    case 'departure': return 250;
-    case 'return': return 300;
-    case 'people': return 350;
-    case 'destination': return 400;
-    default: return 0;
+    case 'departureDate': return {x: 60, y: 250, w: 300, h: 50};
+    case 'return': return {x: 380, y: 250, w: 300, h: 50};
+    case 'people': return {x: 60, y: 430, w: 300, h: 50};
+    case 'destination': return {x: 380, y: 340, w: 300, h: 50};
+    case 'origin' : return {x:60, y: 340, w: 300, h: 50};
+    default: return {x: 0, y: 0, w: 0, h: 0};
   }
 }
 
@@ -182,22 +217,22 @@ function getMonthName(month) {
 
 function mousePressed() {
   // Przycisk wyszukiwania
-  if (mouseX > 40 && mouseX < 240 && mouseY > 480 && mouseY < 530) {
-    let msg = `Szukasz lotu do: ${destination || 'nie wybrano'}\n` +
+  if (mouseX > 60 && mouseX < 360 && mouseY > 550 && mouseY < 610) {
+    let msg = `Szukasz lotu:\n` +
+      `Do: ${destination || 'nie wybrano'}\n` +
+      `Z: ${origin || 'nie wybrano'}\n` +
       `Wylot: ${departureDate || 'nie wybrano'}\n` +
       `Powrót: ${returnDate || 'nie wybrano'}\n` +
       `Liczba osób: ${peopleCount}`;
     alert(msg);
     
-    database.ref("danelotow").set({
+     database.ref("danelotow").set({
 datawylotu: departureDate,
 datapowrotu: returnDate,
 liczbaosób: peopleCount,
-miejsce: destination
+miejsce2: destination,
+miejsce1: origin
 });
-    
-    
-    
     
     return;
   }
@@ -205,21 +240,21 @@ miejsce: destination
   // Obsługa kalendarza
   if (showCalendar) {
     // Kliknięcie poza kalendarzem zamyka go
-    if (mouseX < 350 || mouseX > 650 || mouseY < 200 || mouseY > 450) {
+    if (mouseX < 700 || mouseX > 1000 || mouseY < 250 || mouseY > 500) {
       showCalendar = false;
       activeField = null;
       return;
     }
     
     // Nawigacja kalendarza
-    if (mouseY > 210 && mouseY < 230) {
-      if (mouseX > 360 && mouseX < 380) {
+    if (mouseY > 250 && mouseY < 280) {
+      if (mouseX > 710 && mouseX < 740) {
         currentMonth--;
         if (currentMonth < 0) {
           currentMonth = 11;
           currentYear--;
         }
-      } else if (mouseX > 620 && mouseX < 640) {
+      } else if (mouseX > 950 && mouseX < 980) {
         currentMonth++;
         if (currentMonth > 11) {
           currentMonth = 0;
@@ -229,9 +264,9 @@ miejsce: destination
     }
     
     // Wybór dnia
-    if (mouseY > 275 && mouseY < 425) {
-      let dayX = Math.floor((mouseX - 365) / 40);
-      let dayY = Math.floor((mouseY - 275) / 25);
+    if (mouseY > 330 && mouseY < 720) {
+      let dayX = Math.floor((mouseX - 720) / 40);
+      let dayY = Math.floor((mouseY - 330) / 25);
       let day = dayY * 7 + dayX + 1;
       
       let firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -241,7 +276,7 @@ miejsce: destination
       let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
       if (day >= 1 && day <= daysInMonth) {
         let selectedDate = `${day.toString().padStart(2, '0')}.${(currentMonth + 1).toString().padStart(2, '0')}.${currentYear}`;
-        if (calendarType === 'departure') {
+        if (calendarType === 'departureDate') {
           departureDate = selectedDate;
         } else if (calendarType === 'return') {
           returnDate = selectedDate;
@@ -254,27 +289,35 @@ miejsce: destination
   }
   
   // Pola formularza
-  if (mouseX > 40 && mouseX < 220) {
-    if (mouseY > 250 && mouseY < 285) {
-      activeField = 'departure';
+  if (mouseY > 250 && mouseY < 300) {
+    if (mouseX > 60 && mouseX < 360) {
+      activeField = 'departureDate';
       showCalendar = true;
-      calendarType = 'departure';
-    } else if (mouseY > 300 && mouseY < 335) {
+      calendarType = 'departureDate';
+    } else if (mouseX > 380 && mouseX < 680) {
       activeField = 'return';
       showCalendar = true;
       calendarType = 'return';
-    } else if (mouseY > 350 && mouseY < 385) {
+    }
+  } else if (mouseY > 340 && mouseY < 390) {
+    if (mouseX > 60 && mouseX < 360) {
+      activeField = 'origin';
+    } else if (mouseX > 380 && mouseX < 680) {
+      activeField = 'destination';
+    }
+  } else if (mouseY > 430 && mouseY < 480) {
+    if (mouseX > 60 && mouseX < 360) {
       activeField = 'people';
     }
-  } else if (mouseX > 40 && mouseX < 340 && mouseY > 400 && mouseY < 435) {
-    activeField = 'destination';
+  
+    
   }
   
   // Przyciski +/- dla liczby osób
-  if (mouseY > 350 && mouseY < 385) {
-    if (mouseX > 230 && mouseX < 260 && peopleCount > 1) {
+  if (mouseY > 440 && mouseY < 480) {
+    if (mouseX > 280 && mouseX < 300 && peopleCount > 1) {
       peopleCount--;
-    } else if (mouseX > 270 && mouseX < 300 && peopleCount < 8) {
+    } else if (mouseX > 320 && mouseX < 350 && peopleCount < 185) {
       peopleCount++;
     }
   }
@@ -287,5 +330,16 @@ function keyPressed() {
     } else if (key.length === 1) {
       destination += key;
     }
+  } else if (activeField === 'origin') {
+    if (keyCode === BACKSPACE) {
+      origin = origin.slice(0, -1);
+    } else if (key.length === 1) {
+      origin += key;
+    }
   }
+
+  function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
 }
