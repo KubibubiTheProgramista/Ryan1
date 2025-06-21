@@ -11,6 +11,8 @@ let currentYear = 2025;
 let currentMonth = 6; // Czerwiec (0-11)
 let logoImg;
 let priceChosen = 0;
+let t = 0;
+let wait = false;
 
 function preload() {
   // Load the logo image
@@ -72,6 +74,13 @@ fill("#073590");
   image(logoImg, padding, padding, logoWidth, logoHeight);
 }
   
+  if(wait){
+    t++;
+    if(t==20){
+      window.location.href = 'https://samimiprogramista.github.io/Ryan2/'
+    
+    }
+  }
 }
 
 
@@ -226,7 +235,7 @@ function mousePressed() {
       `Powrót: ${returnDate || 'nie wybrano'}\n` +
       `Liczba osób: ${peopleCount}`;
     alert(msg);
-    
+    wait = true;
      database.ref("danelotow").set({
 datawylotu: departureDate,
 datapowrotu: returnDate,
@@ -235,7 +244,7 @@ miejsce2: destination,
 miejsce1: origin,
 cena: priceChosen
 });
-    
+ 
     return;
   }
   
