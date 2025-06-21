@@ -10,6 +10,7 @@ let calendarType = '';
 let currentYear = 2025;
 let currentMonth = 6; // Czerwiec (0-11)
 let logoImg;
+let priceChosen = 0;
 
 function preload() {
   // Load the logo image
@@ -231,7 +232,8 @@ datawylotu: departureDate,
 datapowrotu: returnDate,
 liczbaosób: peopleCount,
 miejsce2: destination,
-miejsce1: origin
+miejsce1: origin,
+cena: priceChosen
 });
     
     return;
